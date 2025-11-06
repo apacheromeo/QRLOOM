@@ -1,34 +1,31 @@
 import Stripe from 'stripe';
 
 if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set');
+  throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
 }
 
+// Initialize Stripe with API key
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-02-24.acacia',
   typescript: true,
 });
 
-// Create or retrieve a Stripe customer
+// Helper to create or retrieve a Stripe customer
 export async function getOrCreateStripeCustomer(
-  userId: string,
-  email: string
+  email: string,
+  userId: string
 ): Promise<string> {
-  const { createClient } = await import('@/lib/supabase/server');
-  const supabase = await createClient();
+  // Check if customer already exists
+  const existingCustomers = await stripe.customers.list({
+    email,
+    limit: 1,
+  });
 
-  // Check if user already has a Stripe customer ID
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('stripe_customer_id')
-    .eq('id', userId)
-    .single();
-
-  if (profile?.stripe_customer_id) {
-    return profile.stripe_customer_id;
+  if (existingCustomers.data.length > 0) {
+    return existingCustomers.data[0].id;
   }
 
-  // Create new Stripe customer
+  // Create new customer
   const customer = await stripe.customers.create({
     email,
     metadata: {
@@ -36,22 +33,23 @@ export async function getOrCreateStripeCustomer(
     },
   });
 
-  // Save customer ID to database
-  await supabase
-    .from('profiles')
-    .update({ stripe_customer_id: customer.id })
-    .eq('id', userId);
-
   return customer.id;
 }
 
-// Create a checkout session
-export async function createCheckoutSession(
-  customerId: string,
-  priceId: string,
-  successUrl: string,
-  cancelUrl: string
-): Promise<Stripe.Checkout.Session> {
+// Helper to create a checkout session
+export async function createCheckoutSession({
+  customerId,
+  priceId,
+  successUrl,
+  cancelUrl,
+  userId,
+}: {
+  customerId: string;
+  priceId: string;
+  successUrl: string;
+  cancelUrl: string;
+  userId: string;
+}): Promise<Stripe.Checkout.Session> {
   return await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
@@ -64,110 +62,63 @@ export async function createCheckoutSession(
     ],
     success_url: successUrl,
     cancel_url: cancelUrl,
+    metadata: {
+      userId,
+    },
     allow_promotion_codes: true,
+    billing_address_collection: 'auto',
   });
 }
 
-// Create a billing portal session
-export async function createBillingPortalSession(
-  customerId: string,
-  returnUrl: string
-): Promise<Stripe.BillingPortal.Session> {
+// Helper to create a billing portal session
+export async function createBillingPortalSession({
+  customerId,
+  returnUrl,
+}: {
+  customerId: string;
+  returnUrl: string;
+}): Promise<Stripe.BillingPortal.Session> {
   return await stripe.billingPortal.sessions.create({
     customer: customerId,
     return_url: returnUrl,
   });
 }
 
-// Handle subscription created
-export async function handleSubscriptionCreated(
-  subscription: Stripe.Subscription
-): Promise<void> {
-  const { createClient } = await import('@/lib/supabase/server');
-  const supabase = await createClient();
-
-  const customerId = subscription.customer as string;
-  const subscriptionId = subscription.id;
-  const priceId = subscription.items.data[0].price.id;
-
-  // Get user ID from customer
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('stripe_customer_id', customerId)
-    .single();
-
-  if (!profile) {
-    throw new Error('Profile not found for customer');
+// Helper to cancel subscription
+export async function cancelSubscription(
+  subscriptionId: string,
+  cancelAtPeriodEnd = true
+): Promise<Stripe.Subscription> {
+  if (cancelAtPeriodEnd) {
+    return await stripe.subscriptions.update(subscriptionId, {
+      cancel_at_period_end: true,
+    });
+  } else {
+    return await stripe.subscriptions.cancel(subscriptionId);
   }
+}
 
-  // Insert subscription
-  await supabase.from('subscriptions').insert({
-    user_id: profile.id,
-    stripe_subscription_id: subscriptionId,
-    stripe_price_id: priceId,
-    status: subscription.status,
-    current_period_start: new Date(
-      subscription.current_period_start * 1000
-    ).toISOString(),
-    current_period_end: new Date(
-      subscription.current_period_end * 1000
-    ).toISOString(),
+// Helper to reactivate subscription
+export async function reactivateSubscription(
+  subscriptionId: string
+): Promise<Stripe.Subscription> {
+  return await stripe.subscriptions.update(subscriptionId, {
+    cancel_at_period_end: false,
   });
-
-  // Update user plan
-  await supabase
-    .from('profiles')
-    .update({ plan: 'pro' })
-    .eq('id', profile.id);
 }
 
-// Handle subscription updated
-export async function handleSubscriptionUpdated(
-  subscription: Stripe.Subscription
-): Promise<void> {
-  const { createClient } = await import('@/lib/supabase/server');
-  const supabase = await createClient();
-
-  await supabase
-    .from('subscriptions')
-    .update({
-      status: subscription.status,
-      current_period_start: new Date(
-        subscription.current_period_start * 1000
-      ).toISOString(),
-      current_period_end: new Date(
-        subscription.current_period_end * 1000
-      ).toISOString(),
-      cancel_at_period_end: subscription.cancel_at_period_end,
-    })
-    .eq('stripe_subscription_id', subscription.id);
+// Helper to get subscription details
+export async function getSubscription(
+  subscriptionId: string
+): Promise<Stripe.Subscription> {
+  return await stripe.subscriptions.retrieve(subscriptionId);
 }
 
-// Handle subscription deleted
-export async function handleSubscriptionDeleted(
-  subscription: Stripe.Subscription
-): Promise<void> {
-  const { createClient } = await import('@/lib/supabase/server');
-  const supabase = await createClient();
-
-  const { data: subscriptionData } = await supabase
-    .from('subscriptions')
-    .select('user_id')
-    .eq('stripe_subscription_id', subscription.id)
-    .single();
-
-  if (subscriptionData) {
-    // Update user plan to free
-    await supabase
-      .from('profiles')
-      .update({ plan: 'free' })
-      .eq('id', subscriptionData.user_id);
-
-    // Delete subscription record
-    await supabase
-      .from('subscriptions')
-      .delete()
-      .eq('stripe_subscription_id', subscription.id);
-  }
+// Helper to verify webhook signature
+export function verifyWebhookSignature(
+  payload: string | Buffer,
+  signature: string,
+  webhookSecret: string
+): Stripe.Event {
+  return stripe.webhooks.constructEvent(payload, signature, webhookSecret);
 }

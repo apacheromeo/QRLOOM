@@ -21,29 +21,52 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user's profile to check plan limits
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('plan')
-      .eq('id', user.id)
+    // Get user's subscription to check plan limits
+    const { data: subscription } = await supabase
+      .from('user_subscriptions')
+      .select('tier, status')
+      .eq('user_id', user.id)
       .single();
 
-    // Check QR code count limit
-    const { count } = await supabase
-      .from('qrcodes')
-      .select('*', { count: 'exact', head: true })
+    const tier = subscription?.tier || 'free';
+    const isActive = subscription?.status === 'active' || subscription?.status === 'trialing';
+
+    // If subscription is not active and not free, downgrade to free
+    const effectiveTier = isActive ? tier : 'free';
+
+    // Get current period usage
+    const periodStart = new Date();
+    periodStart.setDate(1);
+    periodStart.setHours(0, 0, 0, 0);
+
+    const { data: usage } = await supabase
+      .from('usage_records')
+      .select('qr_codes_created')
       .eq('user_id', user.id)
-      .neq('status', 'deleted');
+      .gte('period_start', periodStart.toISOString())
+      .single();
 
-    const qrCount = count || 0;
+    const currentUsage = usage?.qr_codes_created || 0;
 
-    // Free plan limit: 10 QR codes
-    if (profile?.plan === 'free' && qrCount >= 10) {
+    // Define limits based on tier
+    const limits: Record<string, number> = {
+      free: 10,
+      pro: 1000,
+      enterprise: -1, // unlimited
+    };
+
+    const limit = limits[effectiveTier];
+
+    // Check if user has reached limit (-1 means unlimited)
+    if (limit !== -1 && currentUsage >= limit) {
       return NextResponse.json(
         {
-          error: 'QR code limit reached. Upgrade to Pro for unlimited QR codes.',
-          limit: 10,
-          current: qrCount,
+          error: `QR code limit reached. You've created ${currentUsage} of ${limit} QR codes this month. ${
+            effectiveTier === 'free' ? 'Upgrade to Pro for 1,000 QR codes per month.' : 'Upgrade your plan for more QR codes.'
+          }`,
+          limit,
+          current: currentUsage,
+          tier: effectiveTier,
         },
         { status: 403 }
       );
@@ -100,6 +123,17 @@ export async function POST(request: NextRequest) {
         { error: 'Failed to save QR code' },
         { status: 500 }
       );
+    }
+
+    // Increment usage counter
+    const { error: usageError } = await supabase.rpc('increment_usage', {
+      p_user_id: user.id,
+      p_usage_type: 'qr_codes_created',
+    });
+
+    if (usageError) {
+      console.error('Error updating usage:', usageError);
+      // Don't fail the request if usage update fails
     }
 
     return NextResponse.json({
