@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Download, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,44 +19,38 @@ export function QRPreview({
   isGenerating = false,
   onDownload,
 }: QRPreviewProps) {
-  const canvasRef = useRef<HTMLDivElement>(null);
   const qrBlobRef = useRef<Blob | null>(null);
+  const [qrImageUrl, setQrImageUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Only run in browser
     if (typeof window === 'undefined') return;
-    if (!options || !canvasRef.current) return;
+    if (!options) {
+      setQrImageUrl(null);
+      setError(null);
+      return;
+    }
 
     const generateQR = async () => {
       try {
+        setError(null);
         const generator = new QRCodeGenerator(options);
         const blob = await generator.generate();
         qrBlobRef.current = blob;
 
-        // Display the QR code
+        // Create object URL for display
         const url = URL.createObjectURL(blob);
-        const img = document.createElement('img');
-        img.src = url;
-        img.className = 'w-full h-full object-contain';
+        setQrImageUrl(url);
 
-        // Clear previous content
-        if (canvasRef.current) {
-          canvasRef.current.innerHTML = '';
-          canvasRef.current.appendChild(img);
-        }
-
-        return () => URL.revokeObjectURL(url);
-      } catch (error) {
-        console.error('Error generating QR code:', error);
-        // Show error to user
-        if (canvasRef.current) {
-          canvasRef.current.innerHTML = `
-            <div class="flex flex-col items-center justify-center gap-2 p-4 text-center">
-              <p class="text-sm text-red-500">Failed to generate QR code</p>
-              <p class="text-xs text-muted-foreground">${error instanceof Error ? error.message : 'Unknown error'}</p>
-            </div>
-          `;
-        }
+        // Cleanup function
+        return () => {
+          URL.revokeObjectURL(url);
+        };
+      } catch (err) {
+        console.error('Error generating QR code:', err);
+        setError(err instanceof Error ? err.message : 'Failed to generate QR code');
+        setQrImageUrl(null);
       }
     };
 
@@ -79,10 +73,7 @@ export function QRPreview({
         <CardTitle className="text-lg">Preview</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div
-          ref={canvasRef}
-          className="relative flex items-center justify-center w-full aspect-square bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700"
-        >
+        <div className="relative flex items-center justify-center w-full aspect-square bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
           {isGenerating && (
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -91,16 +82,32 @@ export function QRPreview({
               </p>
             </div>
           )}
-          {!isGenerating && !options && (
+
+          {!isGenerating && !options && !error && (
             <div className="text-center p-6">
               <p className="text-sm text-muted-foreground">
                 Enter a URL and customize your QR code to see the preview
               </p>
             </div>
           )}
+
+          {!isGenerating && error && (
+            <div className="flex flex-col items-center justify-center gap-2 p-4 text-center">
+              <p className="text-sm text-red-500">Failed to generate QR code</p>
+              <p className="text-xs text-muted-foreground">{error}</p>
+            </div>
+          )}
+
+          {!isGenerating && qrImageUrl && !error && (
+            <img
+              src={qrImageUrl}
+              alt="QR Code Preview"
+              className="w-full h-full object-contain p-4"
+            />
+          )}
         </div>
 
-        {options && !isGenerating && (
+        {options && !isGenerating && qrImageUrl && (
           <Button
             onClick={handleDownload}
             className="w-full"
