@@ -1,7 +1,8 @@
 import { getTranslations } from 'next-intl/server';
 import { QRGenerator } from '@/components/qr/qr-generator';
+import { Header } from '@/components/layout/header';
 
-// Force dynamic rendering for Phase 1
+// Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
@@ -10,6 +11,7 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <Header />
       {/* Hero Section */}
       <section className="py-20 px-4 bg-gradient-to-b from-primary/10 to-background">
         <div className="container mx-auto max-w-6xl text-center">
