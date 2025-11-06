@@ -49,19 +49,39 @@ export class QRCodeGenerator {
 
     // Generate based on format
     switch (this.options.format) {
-      case 'svg':
-        return await qrCode.getRawData('svg');
+      case 'svg': {
+        const data = await qrCode.getRawData('svg');
+        if (!data) throw new Error('Failed to generate SVG QR code');
+        return this.ensureBlob(data, 'image/svg+xml');
+      }
       case 'pdf':
         return await this.generatePDF(qrCode);
       case 'png':
-      default:
-        return await qrCode.getRawData('png');
+      default: {
+        const data = await qrCode.getRawData('png');
+        if (!data) throw new Error('Failed to generate PNG QR code');
+        return this.ensureBlob(data, 'image/png');
+      }
     }
+  }
+
+  private ensureBlob(data: Blob | Buffer, type: string): Blob {
+    if (data instanceof Blob) {
+      return data;
+    }
+    // Convert Buffer to Blob
+    const arrayBuffer = data.buffer.slice(
+      data.byteOffset,
+      data.byteOffset + data.byteLength
+    ) as ArrayBuffer;
+    return new Blob([arrayBuffer], { type });
   }
 
   private async generatePDF(qrCode: QRCodeStyling): Promise<Blob> {
     // Get PNG data first
-    const pngBlob = await qrCode.getRawData('png');
+    const pngData = await qrCode.getRawData('png');
+    if (!pngData) throw new Error('Failed to generate PNG for PDF');
+    const pngBlob = this.ensureBlob(pngData, 'image/png');
     const pngDataUrl = await this.blobToDataUrl(pngBlob);
 
     // Create PDF
