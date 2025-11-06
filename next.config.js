@@ -4,6 +4,10 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Force new build ID to bypass Vercel cache
+  generateBuildId: async () => {
+    return `build-${Date.now()}`;
+  },
   images: {
     domains: [
       'lh3.googleusercontent.com', // Google OAuth images
