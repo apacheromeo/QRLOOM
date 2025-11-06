@@ -1,0 +1,304 @@
+{
+  "common": {
+    "appName": "QRLoom",
+    "tagline": "Generate beautiful QR codes instantly",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "download": "Download",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "search": "Search...",
+    "backToHome": "Back to Home",
+    "learnMore": "Learn More",
+    "getStarted": "Get Started",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out"
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "pricing": "Pricing",
+    "docs": "Documentation",
+    "blog": "Blog",
+    "myQRCodes": "My QR Codes",
+    "settings": "Settings",
+    "admin": "Admin"
+  },
+  "hero": {
+    "title": "Generate Beautiful QR Codes",
+    "subtitle": "Create, customize, and track professional QR codes in seconds. Perfect for marketing, events, and business.",
+    "cta": "Create Your QR Code",
+    "freeCta": "Start Free"
+  },
+  "features": {
+    "title": "Powerful Features",
+    "subtitle": "Everything you need to create and manage QR codes",
+    "customization": {
+      "title": "Full Customization",
+      "description": "Customize colors, add logos, and choose from multiple formats (PNG, SVG, PDF)"
+    },
+    "analytics": {
+      "title": "Advanced Analytics",
+      "description": "Track scans, locations, and device types with detailed analytics"
+    },
+    "dynamic": {
+      "title": "Dynamic QR Codes",
+      "description": "Update destination URLs without regenerating QR codes"
+    },
+    "unlimited": {
+      "title": "Unlimited Storage",
+      "description": "Save and access all your QR codes anytime, anywhere"
+    },
+    "export": {
+      "title": "Multiple Formats",
+      "description": "Download as PNG, SVG, or PDF for any use case"
+    },
+    "secure": {
+      "title": "Secure & Reliable",
+      "description": "Your data is encrypted and stored securely on our servers"
+    }
+  },
+  "qr": {
+    "generator": {
+      "title": "QR Code Generator",
+      "urlPlaceholder": "Enter URL or text...",
+      "titlePlaceholder": "QR Code Title (optional)",
+      "descriptionPlaceholder": "Description (optional)",
+      "format": "Format",
+      "colors": "Colors",
+      "foreground": "Foreground",
+      "background": "Background",
+      "logo": "Logo",
+      "uploadLogo": "Upload Logo",
+      "removeLogo": "Remove Logo",
+      "dynamic": "Dynamic QR Code",
+      "dynamicHelp": "Allows you to change the destination URL without regenerating the QR code",
+      "generate": "Generate QR Code",
+      "regenerate": "Regenerate",
+      "preview": "Preview",
+      "noPreview": "Generate a QR code to see preview"
+    },
+    "actions": {
+      "download": "Download",
+      "copyLink": "Copy Link",
+      "share": "Share",
+      "edit": "Edit",
+      "delete": "Delete",
+      "archive": "Archive"
+    },
+    "stats": {
+      "scans": "Scans",
+      "created": "Created",
+      "lastScanned": "Last Scanned",
+      "never": "Never",
+      "views": "Views",
+      "clicks": "Clicks"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "stats": {
+      "totalQR": "Total QR Codes",
+      "totalScans": "Total Scans",
+      "scansThisMonth": "Scans This Month",
+      "activeQR": "Active QR Codes"
+    },
+    "recentQR": "Recent QR Codes",
+    "recentScans": "Recent Scans",
+    "viewAll": "View All",
+    "noQRCodes": "No QR codes yet",
+    "createFirst": "Create your first QR code to get started",
+    "upgrade": "Upgrade to Pro",
+    "upgradeMessage": "Get unlimited QR codes and advanced features"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Sign In to Your Account",
+      "subtitle": "Welcome back! Please enter your details",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signUpLink": "Sign up",
+      "withGoogle": "Continue with Google"
+    },
+    "signUp": {
+      "title": "Create Your Account",
+      "subtitle": "Start creating beautiful QR codes today",
+      "fullName": "Full Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Sign Up",
+      "hasAccount": "Already have an account?",
+      "signInLink": "Sign in",
+      "terms": "By signing up, you agree to our",
+      "termsLink": "Terms of Service",
+      "and": "and",
+      "privacyLink": "Privacy Policy"
+    },
+    "forgotPassword": {
+      "title": "Reset Your Password",
+      "subtitle": "Enter your email to receive a reset link",
+      "submit": "Send Reset Link",
+      "backToSignIn": "Back to sign in"
+    },
+    "errors": {
+      "invalidCredentials": "Invalid email or password",
+      "emailExists": "Email already exists",
+      "weakPassword": "Password is too weak",
+      "passwordMismatch": "Passwords do not match",
+      "unknown": "An error occurred. Please try again."
+    }
+  },
+  "pricing": {
+    "title": "Simple, Transparent Pricing",
+    "subtitle": "Choose the plan that's right for you",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "save": "Save {amount}%",
+    "free": {
+      "name": "Free",
+      "price": "$0",
+      "description": "Perfect for getting started",
+      "cta": "Get Started",
+      "features": [
+        "Up to 10 QR codes",
+        "Basic analytics",
+        "PNG & SVG export",
+        "Standard support"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "${monthly}/mo",
+      "yearlyPrice": "${yearly}/yr",
+      "description": "For professionals and businesses",
+      "cta": "Upgrade to Pro",
+      "popular": "Most Popular",
+      "features": [
+        "Unlimited QR codes",
+        "Dynamic QR codes",
+        "Advanced analytics",
+        "All export formats (PNG/SVG/PDF)",
+        "Custom branding",
+        "Logo upload",
+        "Ad-free experience",
+        "Priority support"
+      ]
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": "Can I upgrade or downgrade my plan?",
+      "a1": "Yes, you can change your plan at any time. Changes will be reflected in your next billing cycle.",
+      "q2": "What payment methods do you accept?",
+      "a2": "We accept all major credit cards through Stripe.",
+      "q3": "Can I cancel my subscription?",
+      "a3": "Yes, you can cancel anytime. You'll have access until the end of your billing period.",
+      "q4": "Do you offer refunds?",
+      "a4": "We offer a 14-day money-back guarantee for all paid plans."
+    }
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "users": {
+      "title": "Users",
+      "total": "Total Users",
+      "paid": "Paid Users",
+      "free": "Free Users",
+      "search": "Search users...",
+      "table": {
+        "email": "Email",
+        "plan": "Plan",
+        "joined": "Joined",
+        "qrCodes": "QR Codes",
+        "actions": "Actions"
+      }
+    },
+    "qrcodes": {
+      "title": "QR Codes",
+      "total": "Total QR Codes",
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "revenue": {
+      "title": "Revenue",
+      "monthly": "Monthly Revenue",
+      "total": "Total Revenue",
+      "mrr": "MRR"
+    },
+    "analytics": {
+      "title": "Analytics",
+      "scansToday": "Scans Today",
+      "scansThisMonth": "Scans This Month",
+      "avgScansPerQR": "Avg Scans per QR"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": {
+      "title": "Profile",
+      "subtitle": "Manage your profile information",
+      "fullName": "Full Name",
+      "email": "Email",
+      "avatar": "Avatar",
+      "changeAvatar": "Change Avatar",
+      "save": "Save Changes"
+    },
+    "account": {
+      "title": "Account",
+      "subtitle": "Manage your account settings",
+      "plan": "Current Plan",
+      "upgrade": "Upgrade Plan",
+      "billing": "Billing Portal",
+      "deleteAccount": "Delete Account",
+      "deleteWarning": "This action cannot be undone"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "subtitle": "Customize your experience",
+      "language": "Language",
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
+  },
+  "errors": {
+    "404": {
+      "title": "Page Not Found",
+      "description": "The page you're looking for doesn't exist",
+      "backHome": "Go Back Home"
+    },
+    "500": {
+      "title": "Server Error",
+      "description": "Something went wrong on our end",
+      "retry": "Try Again"
+    },
+    "unauthorized": "You need to be signed in to access this page",
+    "forbidden": "You don't have permission to access this resource",
+    "rateLimit": "Too many requests. Please try again later."
+  },
+  "footer": {
+    "tagline": "Beautiful QR codes made simple",
+    "product": "Product",
+    "features": "Features",
+    "pricing": "Pricing",
+    "docs": "Documentation",
+    "company": "Company",
+    "about": "About",
+    "blog": "Blog",
+    "contact": "Contact",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "copyright": "© {year} QRLoom. All rights reserved."
+  }
+}
