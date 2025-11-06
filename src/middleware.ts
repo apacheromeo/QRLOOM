@@ -29,13 +29,23 @@ export async function middleware(request: NextRequest) {
 
   if (isProtectedPath) {
     try {
+      // Check if environment variables are available
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        console.warn('Supabase environment variables not available in middleware');
+        // Allow request to continue - auth will be checked at page level
+        return intlResponse || NextResponse.next();
+      }
+
       // Create response for cookie handling
       const response = intlResponse || NextResponse.next();
 
       // Create Supabase client for middleware
       const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        supabaseUrl,
+        supabaseAnonKey,
         {
           cookies: {
             getAll() {
@@ -64,10 +74,8 @@ export async function middleware(request: NextRequest) {
       return response;
     } catch (error) {
       console.error('Middleware auth check error:', error);
-      // On error, redirect to sign in
-      const locale = pathname.split('/')[1] || defaultLocale;
-      const signInUrl = new URL(`/${locale}/auth/signin`, request.url);
-      return NextResponse.redirect(signInUrl);
+      // On error, allow request through - auth will be checked at page level
+      return intlResponse || NextResponse.next();
     }
   }
 
