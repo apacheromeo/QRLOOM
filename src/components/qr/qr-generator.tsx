@@ -1,5 +1,6 @@
 'use client';
 
+// Build version: 2024-11-06T07:30:00Z - Force cache bust
 import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Upload, X } from 'lucide-react';

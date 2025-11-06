@@ -1,5 +1,6 @@
 'use client';
 
+// Build version: 2024-11-06T07:30:00Z - Force cache bust
 import { useRef, useEffect, useState } from 'react';
 import { Download, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

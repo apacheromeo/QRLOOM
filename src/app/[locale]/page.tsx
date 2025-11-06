@@ -1,3 +1,4 @@
+// Build version: 2024-11-06T07:30:00Z - Force cache bust
 import { getTranslations } from 'next-intl/server';
 import { QRGenerator } from '@/components/qr/qr-generator';
 import { Header } from '@/components/layout/header';

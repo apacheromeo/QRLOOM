@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Toaster } from '@/components/ui/toaster';
+import { APP_VERSION } from '@/lib/version';
 
 const locales = ['en', 'th'];
 
@@ -27,7 +28,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased" data-app-version={APP_VERSION}>
         <NextIntlClientProvider messages={messages}>
           {children}
           <Toaster />
