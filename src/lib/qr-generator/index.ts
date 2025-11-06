@@ -15,6 +15,11 @@ export class QRCodeGenerator {
   }
 
   async generate(): Promise<Blob> {
+    // Ensure we're in a browser environment
+    if (typeof window === 'undefined') {
+      throw new Error('QR code generation must run in browser environment');
+    }
+
     const qrCode = new QRCodeStyling({
       width: this.options.width,
       height: this.options.height,

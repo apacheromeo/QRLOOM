@@ -23,6 +23,8 @@ export function QRPreview({
   const qrBlobRef = useRef<Blob | null>(null);
 
   useEffect(() => {
+    // Only run in browser
+    if (typeof window === 'undefined') return;
     if (!options || !canvasRef.current) return;
 
     const generateQR = async () => {
@@ -46,6 +48,15 @@ export function QRPreview({
         return () => URL.revokeObjectURL(url);
       } catch (error) {
         console.error('Error generating QR code:', error);
+        // Show error to user
+        if (canvasRef.current) {
+          canvasRef.current.innerHTML = `
+            <div class="flex flex-col items-center justify-center gap-2 p-4 text-center">
+              <p class="text-sm text-red-500">Failed to generate QR code</p>
+              <p class="text-xs text-muted-foreground">${error instanceof Error ? error.message : 'Unknown error'}</p>
+            </div>
+          `;
+        }
       }
     };
 

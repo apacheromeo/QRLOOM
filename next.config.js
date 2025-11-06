@@ -22,6 +22,18 @@ const nextConfig = {
       bodySizeLimit: '5mb',
     },
   },
+  // Exclude client-only libraries from server bundle
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Don't resolve 'fs' module on the client to prevent this error on build
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        canvas: false,
+      };
+    }
+    return config;
+  },
 };
 
 export default withNextIntl(nextConfig);
