@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getOrCreateStripeCustomer, createCheckoutSession } from '@/lib/stripe';
+import { getOrCreateStripeCustomer, createCheckoutSession, isStripeConfigured } from '@/lib/stripe';
 import { getPlanByTier } from '@/config/subscription-plans';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!isStripeConfigured()) {
+      return NextResponse.json(
+        { error: 'Payment system is not configured. Please contact support.' },
+        { status: 503 }
+      );
+    }
+
     const supabase = await createClient();
 
     // Check authentication
