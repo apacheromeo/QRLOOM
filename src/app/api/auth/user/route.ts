@@ -3,6 +3,22 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: NextRequest) {
   try {
+    // MOCK USER FOR DEV
+    return NextResponse.json({
+      user: {
+        id: 'mock-user-id',
+        email: 'test@example.com',
+        user_metadata: { full_name: 'Test User' }
+      },
+      profile: {
+        id: 'mock-user-id',
+        full_name: 'Test User',
+        email: 'test@example.com',
+        plan: 'free'
+      },
+    });
+
+    /*
     const supabase = await createClient();
 
     // Get current user
@@ -30,6 +46,7 @@ export async function GET(request: NextRequest) {
       user,
       profile,
     });
+    */
   } catch (error) {
     console.error('Get user error:', error);
     return NextResponse.json(

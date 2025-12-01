@@ -23,7 +23,6 @@ import {
 import {
   MoreVertical,
   Edit,
-  Download,
   Archive,
   Trash2,
   Copy,
@@ -58,7 +57,7 @@ export function QRActions({
         title: 'Link copied!',
         description: 'Short URL copied to clipboard',
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Failed to copy',
         description: 'Could not copy link to clipboard',
@@ -81,13 +80,12 @@ export function QRActions({
 
       toast({
         title: status === 'archived' ? 'Unarchived!' : 'Archived!',
-        description: `QR code ${
-          status === 'archived' ? 'restored' : 'moved to archive'
-        }`,
+        description: `QR code ${status === 'archived' ? 'restored' : 'moved to archive'
+          }`,
       });
 
       onUpdate?.();
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to update QR code',
@@ -113,7 +111,7 @@ export function QRActions({
       setShowDeleteDialog(false);
       onUpdate?.();
       router.push('/qr-codes');
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to delete QR code',

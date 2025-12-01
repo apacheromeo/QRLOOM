@@ -10,105 +10,24 @@ import { QrCode, TrendingUp, Eye, Activity, Plus } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
+  // MOCK DATA FOR DEV
+  const user = { id: 'mock-user-id', email: 'test@example.com' };
+  const profile = { full_name: 'Test User', plan: 'free', email: 'test@example.com' };
+  const totalQRCodes = 12;
+  const totalScans = 1250;
+  const scansThisMonth = 350;
+  const recentQRCodes = [
+    { id: '1', title: 'My Website', created_at: new Date().toISOString(), data_url: 'https://example.com', short_code: 'abc', scan_count: 120, status: 'active' },
+    { id: '2', title: 'WiFi', created_at: new Date(Date.now() - 86400000).toISOString(), data_url: 'WIFI:S:MyNetwork;T:WPA;P:password;;', short_code: 'def', scan_count: 50, status: 'active' },
+  ];
+  const recentScans = [
+    { id: '1', qrcode_id: '1', scanned_at: new Date().toISOString(), country: 'US', city: 'New York', device_type: 'Mobile', browser: 'Chrome', qrcode: { title: 'My Website' } },
+    { id: '2', qrcode_id: '2', scanned_at: new Date(Date.now() - 3600000).toISOString(), country: 'UK', city: 'London', device_type: 'Desktop', browser: 'Safari', qrcode: { title: 'WiFi' } },
+  ];
 
-  // Check authentication
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) {
-    redirect('/auth/signin');
-  }
-
-  // First, fetch user's QR code IDs
-  const { data: userQRCodes } = await supabase
-    .from('qrcodes')
-    .select('id')
-    .eq('user_id', user.id);
-
-  const qrCodeIds = userQRCodes?.map((qr) => qr.id) || [];
-
-  // Fetch user's statistics
-  const [
-    { count: totalQRCodes },
-    { count: totalScans },
-    { data: recentQRCodes },
-    { data: recentScans },
-    { data: profile },
-  ] = await Promise.all([
-    // Total active QR codes
-    supabase
-      .from('qrcodes')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('status', 'active'),
-
-    // Total scans across all QR codes
-    qrCodeIds.length > 0
-      ? supabase
-          .from('scans')
-          .select('*', { count: 'exact', head: true })
-          .in('qrcode_id', qrCodeIds)
-      : Promise.resolve({ count: 0 }),
-
-    // Recent QR codes (last 5)
-    supabase
-      .from('qrcodes')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(5),
-
-    // Recent scans (last 10) with QR code info
-    supabase
-      .from('scans')
-      .select(`
-        *,
-        qrcode:qrcodes!inner(
-          id,
-          title,
-          user_id
-        )
-      `)
-      .eq('qrcode.user_id', user.id)
-      .order('scanned_at', { ascending: false })
-      .limit(10),
-
-    // User profile
-    supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single(),
-  ]);
-
-  // Calculate scans this month
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-  const scansThisMonthResult = qrCodeIds.length > 0
-    ? await supabase
-        .from('scans')
-        .select('*', { count: 'exact', head: true })
-        .in('qrcode_id', qrCodeIds)
-        .gte('scanned_at', startOfMonth.toISOString())
-    : { count: 0 };
-
-  const scansThisMonth = scansThisMonthResult.count || 0;
-
-  // Calculate plan limits
-  const planLimits =
-    profile?.plan === 'free'
-      ? { maxQRCodes: 10, maxScansPerMonth: 1000 }
-      : { maxQRCodes: -1, maxScansPerMonth: -1 }; // Unlimited for Pro
-
-  const qrCodeUsage =
-    planLimits.maxQRCodes > 0
-      ? `${totalQRCodes || 0} / ${planLimits.maxQRCodes}`
-      : `${totalQRCodes || 0}`;
-
-  const scanUsage =
-    planLimits.maxScansPerMonth > 0
-      ? `${scansThisMonth} / ${planLimits.maxScansPerMonth}`
-      : `${scansThisMonth}`;
+  const planLimits = { maxQRCodes: 10, maxScansPerMonth: 1000 };
+  const qrCodeUsage = `${totalQRCodes} / ${planLimits.maxQRCodes}`;
+  const scanUsage = `${scansThisMonth} / ${planLimits.maxScansPerMonth}`;
 
   return (
     <div className="container py-8 space-y-8">
@@ -132,11 +51,10 @@ export default async function DashboardPage() {
       {profile?.plan && (
         <div className="flex items-center gap-2">
           <span
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              profile.plan === 'pro'
+            className={`px-3 py-1 rounded-full text-sm font-medium ${profile.plan === 'pro'
                 ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
                 : 'bg-gray-200 text-gray-800'
-            }`}
+              }`}
           >
             {profile.plan === 'pro' ? '⭐ Pro Plan' : 'Free Plan'}
           </span>

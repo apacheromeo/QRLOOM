@@ -4,6 +4,10 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
+import { QrCode } from 'lucide-react';
+import { MainNav } from './main-nav';
+import { MobileNav } from './mobile-nav';
+import { ModeToggle } from '@/components/mode-toggle';
 
 export function Header() {
   const t = useTranslations('common');
@@ -12,49 +16,52 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="text-2xl font-bold">
-          {t('appName')}
+      <div className="container flex h-16 items-center">
+        <MobileNav />
+
+        <Link href="/" className="flex items-center gap-2 mr-6 md:mr-8">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground">
+            <QrCode className="h-5 w-5 text-background" />
+          </div>
+          <span className="text-lg font-semibold tracking-tight hidden md:inline-block">{t('appName')}</span>
+          <span className="text-lg font-semibold tracking-tight md:hidden">QRLoom</span>
         </Link>
 
-        <nav className="flex items-center gap-4">
+        <MainNav />
+
+        <div className="flex flex-1 items-center justify-end gap-2">
+          <ModeToggle />
           {user ? (
             <>
-              <Link
-                href="/dashboard"
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-              >
-                {tNav('dashboard')}
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+                  {tNav('dashboard')}
+                </Button>
               </Link>
-              <Link
-                href="/qr-codes"
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-              >
-                {tNav('myQRCodes')}
+              <Link href="/qr-codes">
+                <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+                  {tNav('myQRCodes')}
+                </Button>
               </Link>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => signOut()}
-              >
+              <Button variant="ghost" size="sm" onClick={() => signOut()}>
                 {t('signOut')}
               </Button>
             </>
           ) : (
             <>
-              <Link href="/auth/signin">
+              <Link href="/signin">
                 <Button variant="ghost" size="sm">
                   {t('signIn')}
                 </Button>
               </Link>
-              <Link href="/auth/signup">
+              <Link href="/signup">
                 <Button size="sm">
                   {t('signUp')}
                 </Button>
               </Link>
             </>
           )}
-        </nav>
+        </div>
       </div>
     </header>
   );

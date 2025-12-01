@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MoreVertical } from 'lucide-react';
+import { QrCode, ArrowRight, Calendar, Download, ExternalLink } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface QRCode {

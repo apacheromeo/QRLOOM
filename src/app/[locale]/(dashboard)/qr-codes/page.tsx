@@ -48,41 +48,73 @@ export default function QRCodesPage() {
   // Redirect to signin if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/auth/signin');
+      router.push('/signin');
     }
   }, [user, authLoading, router]);
 
-  // Fetch QR codes
+  // Fetch QR codes (MOCK)
   const fetchQRCodes = async () => {
     if (!user) return;
 
     setLoading(true);
     setError(null);
 
-    try {
-      const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
-        search,
-        status,
-        sortBy,
-        sortOrder: 'desc',
-      });
+    // Simulate API delay
+    setTimeout(() => {
+      const mockQRCodes = [
+        {
+          id: '1',
+          title: 'My Website',
+          data_url: 'https://example.com',
+          short_code: 'abc',
+          scan_count: 120,
+          created_at: new Date().toISOString(),
+          status: 'active',
+          foreground_color: '#000000',
+          background_color: '#ffffff',
+        },
+        {
+          id: '2',
+          title: 'WiFi Network',
+          data_url: 'WIFI:S:MyNetwork;T:WPA;P:password;;',
+          short_code: 'def',
+          scan_count: 50,
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          status: 'active',
+          foreground_color: '#4F46E5',
+          background_color: '#ffffff',
+        },
+        {
+          id: '3',
+          title: 'Contact Card',
+          data_url: 'BEGIN:VCARD...',
+          short_code: 'ghi',
+          scan_count: 12,
+          created_at: new Date(Date.now() - 172800000).toISOString(),
+          status: 'archived',
+          foreground_color: '#000000',
+          background_color: '#F3F4F6',
+        },
+      ];
 
-      const response = await fetch(`/api/qr/list?${params}`);
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch QR codes');
+      // Filter mock data based on search and status
+      let filtered = mockQRCodes;
+      if (search) {
+        filtered = filtered.filter(qr => qr.title.toLowerCase().includes(search.toLowerCase()));
+      }
+      if (status !== 'all') {
+        filtered = filtered.filter(qr => qr.status === status);
       }
 
-      const data = await response.json();
-      setQrcodes(data.qrcodes);
-      setPagination(data.pagination);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
+      setQrcodes(filtered);
+      setPagination({
+        page: 1,
+        limit: 12,
+        total: filtered.length,
+        totalPages: 1,
+      });
       setLoading(false);
-    }
+    }, 500);
   };
 
   useEffect(() => {

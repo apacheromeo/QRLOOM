@@ -112,7 +112,7 @@ export function SignUpForm() {
 
       <p className="text-center text-sm text-muted-foreground">
         {t('hasAccount')}{' '}
-        <Link href="/auth/signin" className="text-primary hover:underline">
+        <Link href="/signin" className="text-primary hover:underline">
           {t('signInLink')}
         </Link>
       </p>

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, MoreVertical, QrCode } from 'lucide-react';
+import { ExternalLink, QrCode } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface QRCardProps {
@@ -21,7 +21,7 @@ interface QRCardProps {
   onAction?: (action: 'edit' | 'delete' | 'archive', id: string) => void;
 }
 
-export function QRCard({ qrcode, onAction }: QRCardProps) {
+export function QRCard({ qrcode }: QRCardProps) {
   const shortUrl = `${process.env.NEXT_PUBLIC_APP_URL || ''}/r/${qrcode.short_code}`;
 
   return (

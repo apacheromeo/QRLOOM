@@ -1,4 +1,4 @@
-'use client';
+
 
 import { Card } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
@@ -30,9 +30,8 @@ export function StatsCard({
             <h3 className="text-3xl font-bold">{value}</h3>
             {trend && (
               <span
-                className={`text-sm font-medium ${
-                  trend.isPositive ? 'text-green-600' : 'text-red-600'
-                }`}
+                className={`text-sm font-medium ${trend.isPositive ? 'text-green-600' : 'text-red-600'
+                  }`}
               >
                 {trend.isPositive ? '+' : ''}
                 {trend.value}%

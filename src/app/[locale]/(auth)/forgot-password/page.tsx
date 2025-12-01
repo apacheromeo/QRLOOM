@@ -76,7 +76,7 @@ export default function ForgotPasswordPage() {
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">
-              <Link href="/auth/signin" className="text-primary hover:underline">
+              <Link href="/signin" className="text-primary hover:underline">
                 {t('backToSignIn')}
               </Link>
             </p>

@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { QRActions } from '@/components/qr/qr-actions';
 import { QRPreview } from '@/components/qr/qr-preview';
 import { StatsCard } from '@/components/dashboard/stats-card';
+import { AnalyticsCharts } from '@/components/dashboard/analytics-charts';
 import { useToast } from '@/hooks/use-toast';
 import {
   Loader2,
@@ -17,11 +18,13 @@ import {
   Calendar,
   Link as LinkIcon,
   Copy,
-  Download,
   ArrowLeft,
+  Share2,
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import Link from 'next/link';
+import { updateQRCode } from '@/actions/qr-actions';
+import { AffiliateBanner } from '@/components/ads/affiliate-banner';
 
 interface QRCode {
   id: string;
@@ -60,46 +63,43 @@ export default function QRDetailPage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/auth/signin');
+      router.push('/signin');
     }
   }, [user, authLoading, router]);
 
-  // Fetch QR code details
+  // Fetch QR code details (MOCK)
   const fetchQRCode = async () => {
     if (!user) return;
 
     setLoading(true);
-    try {
-      const response = await fetch(`/api/qr/${params.id}`);
 
-      if (!response.ok) {
-        if (response.status === 404) {
-          toast({
-            title: 'Not found',
-            description: 'QR code not found',
-            variant: 'destructive',
-          });
-          router.push('/qr-codes');
-          return;
-        }
-        throw new Error('Failed to fetch QR code');
-      }
+    // Simulate API delay
+    setTimeout(() => {
+      const id = params.id as string;
+      const mockData = {
+        id,
+        title: id === '1' ? 'My Website' : 'WiFi Network',
+        description: 'Main website link',
+        data_url: id === '1' ? 'https://example.com' : 'WIFI:S:MyNetwork;T:WPA;P:password;;',
+        short_code: id === '1' ? 'abc' : 'def',
+        scan_count: id === '1' ? 120 : 50,
+        created_at: new Date().toISOString(),
+        status: 'active',
+        foreground_color: '#000000',
+        background_color: '#ffffff',
+        logo_url: null,
+        format: 'png',
+        is_dynamic: true,
+        redirect_url: null
+      };
 
-      const data = await response.json();
-      setQrcode(data.qrcode);
+      setQrcode(mockData);
       setEditForm({
-        title: data.qrcode.title,
-        description: data.qrcode.description || '',
+        title: mockData.title,
+        description: mockData.description || '',
       });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to load QR code',
-        variant: 'destructive',
-      });
-    } finally {
       setLoading(false);
-    }
+    }, 500);
   };
 
   useEffect(() => {
@@ -108,25 +108,31 @@ export default function QRDetailPage() {
     }
   }, [user, params.id]);
 
+
+
   const handleSave = async () => {
     if (!qrcode) return;
 
+    const formData = new FormData();
+    formData.append('id', qrcode.id);
+    formData.append('title', editForm.title);
+    formData.append('description', editForm.description || '');
+
     try {
-      const response = await fetch(`/api/qr/${qrcode.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editForm),
-      });
+      const result = await updateQRCode({}, formData);
 
-      if (!response.ok) throw new Error();
+      if (result.message) {
+        toast({
+          title: result.message.includes('Success') ? 'Saved!' : 'Error',
+          description: result.message,
+          variant: result.message.includes('Success') ? 'default' : 'destructive',
+        });
+      }
 
-      const data = await response.json();
-      setQrcode(data.qrcode);
-      setIsEditing(false);
-      toast({
-        title: 'Saved!',
-        description: 'QR code updated successfully',
-      });
+      if (!result.errors) {
+        setQrcode({ ...qrcode, ...editForm });
+        setIsEditing(false);
+      }
     } catch (error) {
       toast({
         title: 'Error',
@@ -150,6 +156,47 @@ export default function QRDetailPage() {
         variant: 'destructive',
       });
     }
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: qrcode?.title || 'QR Code',
+          text: `Check out this QR code: ${qrcode?.title}`,
+          url: shortUrl,
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    } else {
+      handleCopyLink();
+    }
+  };
+
+  // Mock Analytics Data
+  const mockAnalytics = {
+    dailyScans: [
+      { date: 'Mon', count: 12 },
+      { date: 'Tue', count: 18 },
+      { date: 'Wed', count: 15 },
+      { date: 'Thu', count: 25 },
+      { date: 'Fri', count: 32 },
+      { date: 'Sat', count: 45 },
+      { date: 'Sun', count: 20 },
+    ],
+    deviceType: [
+      { name: 'Mobile', value: 85 },
+      { name: 'Desktop', value: 10 },
+      { name: 'Tablet', value: 5 },
+    ],
+    locations: [
+      { name: 'USA', value: 45 },
+      { name: 'UK', value: 20 },
+      { name: 'Germany', value: 15 },
+      { name: 'France', value: 10 },
+      { name: 'Other', value: 10 },
+    ],
   };
 
   if (authLoading || loading) {
@@ -224,13 +271,27 @@ export default function QRDetailPage() {
           <div className="mt-4 space-y-2">
             <div className="flex items-center gap-2">
               <Input value={shortUrl} readOnly className="flex-1" />
-              <Button onClick={handleCopyLink} size="icon">
+              <Button onClick={handleCopyLink} size="icon" variant="outline" title="Copy Link">
                 <Copy className="h-4 w-4" />
+              </Button>
+
+              <Button onClick={handleShare} size="icon" title="Share">
+                <Share2 className="h-4 w-4" />
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
               Share this short URL to track scans
             </p>
+          </div>
+          <div className="mt-6 pt-6 border-t">
+            <AffiliateBanner
+              platform="lazada"
+              link="https://lazada.co.th"
+              imageSrc="https://placehold.co/400x100/blue/white?text=Lazada+Deals"
+              alt="Shop on Lazada"
+              width={400}
+              height={100}
+            />
           </div>
         </Card>
 
@@ -340,18 +401,13 @@ export default function QRDetailPage() {
             </div>
           </div>
         </Card>
-      </div>
+      </div >
 
-      {/* Analytics Placeholder */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Analytics</h3>
-        <div className="text-center py-8 text-muted-foreground">
-          <p>Detailed analytics coming in Phase 4</p>
-          <p className="text-sm mt-2">
-            Track scans by location, device, and time
-          </p>
-        </div>
-      </Card>
-    </div>
+      {/* Analytics Charts */}
+      < div className="space-y-4" >
+        <h2 className="text-2xl font-bold">Analytics</h2>
+        <AnalyticsCharts data={mockAnalytics} />
+      </div >
+    </div >
   );
 }

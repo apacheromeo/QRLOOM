@@ -1,46 +1,16 @@
 import { useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+// import { createClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/stores/auth-store';
+import { User } from '@supabase/supabase-js';
 
 export function useAuth() {
   const router = useRouter();
   const { user, profile, loading, setUser, setProfile, setLoading, clearAuth } =
     useAuthStore();
 
-  // Initialize auth state
-  useEffect(() => {
-    const supabase = createClient();
-
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-
-      // Fetch profile if user exists
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      }
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setProfile(null);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [setUser, setProfile, setLoading]);
-
   // Fetch user profile
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/user');
       if (response.ok) {
@@ -50,7 +20,28 @@ export function useAuth() {
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
-  };
+  }, [setProfile]);
+
+  // Initialize auth state (MOCK FOR DEV)
+  useEffect(() => {
+    // Simulate checking session
+    setTimeout(() => {
+      const mockUser = {
+        id: 'mock-user-id',
+        email: 'test@example.com',
+        user_metadata: { full_name: 'Test User' },
+        app_metadata: {},
+        aud: 'authenticated',
+        created_at: new Date().toISOString(),
+      } as unknown as User;
+
+      setUser(mockUser);
+      setLoading(false);
+
+      // Fetch profile
+      fetchProfile();
+    }, 500);
+  }, [setUser, setLoading, fetchProfile]);
 
   // Sign in
   const signIn = useCallback(

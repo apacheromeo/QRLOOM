@@ -36,8 +36,9 @@ export function QRPreview({
       try {
         setError(null);
         const generator = new QRCodeGenerator(options);
-        const blob = await generator.generate();
-        qrBlobRef.current = blob;
+        // Use generatePreview for display (always returns PNG)
+        const blob = await generator.generatePreview();
+        qrBlobRef.current = blob; // Store preview blob for now, but we'll regenerate for download if needed
 
         // Create object URL for display
         const url = URL.createObjectURL(blob);
@@ -57,14 +58,23 @@ export function QRPreview({
     generateQR();
   }, [options]);
 
-  const handleDownload = () => {
-    if (!qrBlobRef.current || !options) return;
+  const handleDownload = async () => {
+    if (!options) return;
 
-    const extension = QRCodeGenerator.getFileExtension(options.format);
-    const filename = `qrcode-${Date.now()}.${extension}`;
+    try {
+      const generator = new QRCodeGenerator(options);
+      // Generate the actual format for download
+      const blob = await generator.generate();
 
-    downloadFile(qrBlobRef.current, filename);
-    onDownload?.();
+      const extension = QRCodeGenerator.getFileExtension(options.format);
+      const filename = `qrcode-${Date.now()}.${extension}`;
+
+      downloadFile(blob, filename);
+      onDownload?.();
+    } catch (err) {
+      console.error('Error downloading QR code:', err);
+      // You might want to show a toast error here
+    }
   };
 
   return (

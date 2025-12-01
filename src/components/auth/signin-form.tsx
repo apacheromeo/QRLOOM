@@ -84,7 +84,7 @@ export function SignInForm() {
 
       <p className="text-center text-sm text-muted-foreground">
         {t('noAccount')}{' '}
-        <Link href="/auth/signup" className="text-primary hover:underline">
+        <Link href="/signup" className="text-primary hover:underline">
           {t('signUpLink')}
         </Link>
       </p>
