@@ -12,7 +12,7 @@ import { ModeToggle } from '@/components/mode-toggle';
 export function Header() {
   const t = useTranslations('common');
   const tNav = useTranslations('nav');
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -31,7 +31,12 @@ export function Header() {
 
         <div className="flex flex-1 items-center justify-end gap-2">
           <ModeToggle />
-          {user ? (
+          {loading ? (
+            <div className="flex items-center gap-2">
+              <div className="h-9 w-20 animate-pulse rounded-md bg-muted" />
+              <div className="h-9 w-20 animate-pulse rounded-md bg-muted" />
+            </div>
+          ) : user ? (
             <>
               <Link href="/dashboard">
                 <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
