@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/custom-alert';
 import { QRPreview } from './qr-preview';
 import { isValidUrl } from '@/lib/qr-generator';
 import type { QRCodeOptions, QRFormat } from '@/types';
