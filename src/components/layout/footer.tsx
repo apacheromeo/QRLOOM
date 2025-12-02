@@ -38,7 +38,7 @@ export function Footer() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/docs" className="text-muted-foreground hover:text-foreground transition-colors">
+                                <Link href="/learn/guide" className="text-muted-foreground hover:text-foreground transition-colors">
                                     {t('docs')}
                                 </Link>
                             </li>
@@ -55,7 +55,7 @@ export function Footer() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">
+                                <Link href="/learn/blog" className="text-muted-foreground hover:text-foreground transition-colors">
                                     {t('blog')}
                                 </Link>
                             </li>

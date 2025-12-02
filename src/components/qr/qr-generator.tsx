@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 // import { useTranslations } from 'next-intl';
-import { Upload, X, Sparkles } from 'lucide-react';
+import { Upload, X, Sparkles, Info } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,12 +15,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { QRPreview } from './qr-preview';
 import { isValidUrl } from '@/lib/qr-generator';
 import type { QRCodeOptions, QRFormat } from '@/types';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 
 export function QRGenerator() {
   // const t = useTranslations('qr.generator');
+  const { user } = useAuth();
+  const router = useRouter();
 
   const [dataUrl, setDataUrl] = useState('');
   const [format, setFormat] = useState<QRFormat>('png');
@@ -63,6 +68,12 @@ export function QRGenerator() {
     let input = dataUrl.trim();
     if (!input) {
       setError('Please enter a URL or text');
+      return;
+    }
+
+    // GUEST LIMIT: Dynamic QR codes require login
+    if (isDynamic && !user) {
+      setError('Dynamic QR codes require an account. Please sign in or sign up.');
       return;
     }
 
@@ -109,7 +120,7 @@ export function QRGenerator() {
     setTimeout(() => {
       setIsGenerating(false);
     }, 500);
-  }, [dataUrl, format, foregroundColor, backgroundColor, logo, isDynamic]);
+  }, [dataUrl, format, foregroundColor, backgroundColor, logo, isDynamic, user]);
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
@@ -164,10 +175,16 @@ export function QRGenerator() {
                   <Switch
                     id="dynamic"
                     checked={isDynamic}
-                    onCheckedChange={setIsDynamic}
+                    onCheckedChange={(checked) => {
+                      if (checked && !user) {
+                        // Optional: could redirect or show modal here
+                        // For now, we let them toggle but block generation
+                      }
+                      setIsDynamic(checked);
+                    }}
                   />
                   <Label htmlFor="dynamic" className="text-sm cursor-pointer flex-1">
-                    Enable dynamic updates
+                    Enable dynamic updates {(!user) && <span className="text-xs text-muted-foreground ml-2">(Requires Account)</span>}
                   </Label>
                 </div>
               </div>
@@ -291,6 +308,20 @@ export function QRGenerator() {
                 </>
               )}
             </Button>
+
+            {/* Guest Signup Prompt */}
+            {!user && qrOptions && (
+              <Alert className="bg-muted/50">
+                <Info className="h-4 w-4" />
+                <AlertTitle>Want to save this QR code?</AlertTitle>
+                <AlertDescription className="mt-2 flex flex-col gap-2">
+                  <p>Sign up for free to save your QR codes, track scans, and edit them later.</p>
+                  <Button variant="outline" size="sm" onClick={() => router.push('/signup')} className="w-fit">
+                    Create Free Account
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
           </CardContent>
         </Card>
       </div>

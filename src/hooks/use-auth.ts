@@ -22,26 +22,28 @@ export function useAuth() {
     }
   }, [setProfile]);
 
-  // Initialize auth state (MOCK FOR DEV)
+  // Initialize auth state
   useEffect(() => {
-    // Simulate checking session
-    setTimeout(() => {
-      const mockUser = {
-        id: 'mock-user-id',
-        email: 'test@example.com',
-        user_metadata: { full_name: 'Test User' },
-        app_metadata: {},
-        aud: 'authenticated',
-        created_at: new Date().toISOString(),
-      } as unknown as User;
+    const checkUser = async () => {
+      try {
+        const response = await fetch('/api/auth/user');
+        if (response.ok) {
+          const data = await response.json();
+          setUser(data.user);
+          setProfile(data.profile);
+        } else {
+          clearAuth();
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error);
+        clearAuth();
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      setUser(mockUser);
-      setLoading(false);
-
-      // Fetch profile
-      fetchProfile();
-    }, 500);
-  }, [setUser, setLoading, fetchProfile]);
+    checkUser();
+  }, [setUser, setProfile, setLoading, clearAuth]);
 
   // Sign in
   const signIn = useCallback(
