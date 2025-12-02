@@ -29,7 +29,7 @@ export const useAuthStore = create<AuthState>()(
       clearAuth: () => set({ user: null, profile: null }),
     }),
     {
-      name: 'auth-storage',
+      name: 'auth-storage-v2',
       partialize: (state) => ({
         user: state.user,
         profile: state.profile,
